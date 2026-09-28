@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Insight Music • Learn & Play</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%237a2e3b'/><text x='50' y='60' font-size='66' font-family='serif' font-weight='700' text-anchor='middle' dominant-baseline='central' fill='%23f5e6c8'>♪</text></svg>">
+<style>
+:root{
+  --bg:#fbf7ef;--paper:#fffdf8;--ink:#2e2028;--muted:#7a6b6f;
+  --accent:#7a2e3b;--accent2:#a55462;--gold:#c9962e;--gold2:#e8bc6a;
+  --green:#5b7d5f;--red:#b8443c;
+  --shadow:0 12px 35px rgba(70,40,50,.10);--radius:22px;
+  --spring:cubic-bezier(.34,1.56,.64,1);
+  --smooth:cubic-bezier(.22,1,.36,1);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);
+background:
+  radial-gradient(circle at 15% 10%,rgba(232,185,106,.14) 0 18%,transparent 45%),
+  radial-gradient(circle at 85% 90%,rgba(165,84,98,.10) 0 20%,transparent 50%),
+  linear-gradient(135deg,#fbf7ef,#f6efe2 55%,#fcf8f0);
+min-height:100vh;overflow-x:hidden;
+background-size:200% 200%;animation:bgShift 22s ease infinite}
+@keyframes bgShift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+.bg-note{position:fixed;font-family:Georgia,serif;color:var(--accent);opacity:.07;pointer-events:none;z-index:0;user-select:none}
+@keyframes floatNote{0%{transform:translateY(0) rotate(0);opacity:.07}50%{transform:translateY(-30px) rotate(15deg) scale(1.15);opacity:.11}100%{transform:translateY(0) rotate(0);opacity:.07}}
+@keyframes drift{0%{transform:translate(0,0) rotate(0)}50%{transform:translate(40px,-20px) rotate(180deg)}100%{transform:translate(0,0) rotate(360deg)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+@keyframes float{0%,100%{transform:translateY(0) rotate(-5deg)}50%{transform:translateY(-14px) rotate(5deg)}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(122,46,59,.35)}50%{box-shadow:0 0 0 14px rgba(122,46,59,0)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px) rotate(-2deg)}40%{transform:translateX(8px) rotate(2deg)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+@keyframes pop{0%,100%{transform:scale(.85);opacity:0}70%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+@keyframes bounceIn{0%{transform:scale(.3) translateY(40px);opacity:0}60%{transform:scale(1.12) translateY(-8px)}80%{transform:scale(.96)}100%{transform:scale(1) translateY(0);opacity:1}}
+@keyframes wiggle{0%,100%{transform:rotate(0)}25%{transform:rotate(-10deg)}75%{transform:rotate(10deg)}}
+@keyframes gradientShift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+@keyframes ripple{0%{transform:scale(0);opacity:.7}100%{transform:scale(4);opacity:0}}
+@keyframes glow{0%,100%{box-shadow:0 0 20px rgba(122,46,59,.3)}50%{box-shadow:0 0 34px rgba(122,46,59,.5)}}
+@keyframes confettiFall{0%{transform:translateY(-10vh) rotate(0);opacity:1}100%{transform:translateY(110vh) rotate(720deg);opacity:0}}
+@keyframes beat{0%,100%{transform:scale(1)}30%{transform:scale(1.18)}60%{transform:scale(.96)}}
+@keyframes slideInLeft{from{opacity:0;transform:translateX(-60px) rotate(-4deg)}to{opacity:1;transform:translateX(0) rotate(0)}}
+@keyframes slideInRight{from{opacity:0;transform:translateX(60px) rotate(4deg)}to{opacity:1;transform:translateX(0) rotate(0)}}
+@keyframes heartbeat{0%,100%{transform:scale(1)}15%{transform:scale(1.14)}30%{transform:scale(1)}45%{transform:scale(1.08)}60%{transform:scale(1)}}
+@keyframes noteAppear{
+  0%{opacity:0;transform:scale(0) rotate(-90deg);transform-origin:center}
+  60%{opacity:1;transform:scale(1.3) rotate(10deg)}
+  100%{opacity:1;transform:scale(1) rotate(0)}
+}
+@keyframes noteBounce{
+  0%,100%{transform:translateY(0) scale(1)}
+  50%{transform:translateY(-6px) scale(1.05)}
+}
+@keyframes staffDraw{from{stroke-dashoffset:200}to{stroke-dashoffset:0}}
+@keyframes rippleRing{
+  0%{r:8;opacity:.7;stroke-width:3}
+  100%{r:30;opacity:0;stroke-width:1}
+}
+button{font:inherit}
+
+header{max-width:1120px;margin:auto;padding:28px 22px 10px;display:flex;justify-content:space-between;align-items:center;gap:20px;animation:fadeUp .6s var(--smooth) both;flex-wrap:wrap;position:relative;z-index:2}
+.brand{display:flex;align-items:center;gap:13px}
+.logo{width:52px;height:52px;border-radius:18px;background:linear-gradient(135deg,var(--accent),var(--gold));color:white;display:grid;place-items:center;font-size:28px;box-shadow:0 12px 30px rgba(122,46,59,.3);transition:.4s var(--spring);cursor:pointer}
+.logo:hover{transform:rotate(-18deg) scale(1.18);border-radius:26px;animation:wiggle .6s ease}
+.brand h1{margin:0;font-size:22px;color:var(--accent);letter-spacing:-.5px}
+.brand p{margin:2px 0 0;color:var(--muted);font-size:12px}
+nav{display:flex;gap:6px;flex-wrap:wrap}
+.nav{border:0;background:transparent;padding:11px 16px;border-radius:14px;color:var(--muted);cursor:pointer;position:relative;overflow:hidden;transition:.3s var(--spring);font-weight:600}
+.nav:before{content:"";position:absolute;inset:0;background:var(--paper);border-radius:14px;transform:scale(0);transition:.4s var(--spring);z-index:-1}
+.nav:hover:before,.nav.active:before{transform:scale(1)}
+.nav:hover,.nav.active{color:var(--accent);transform:translateY(-3px)}
+.nav.active{box-shadow:0 6px 20px rgba(70,40,50,.10);background:var(--paper)}
+.nav.active:after{content:"";position:absolute;left:50%;bottom:4px;width:20px;height:3px;border-radius:3px;background:linear-gradient(90deg,var(--accent),var(--gold));transform:translateX(-50%);animation:pop .4s var(--spring)}
+
+main{max-width:1120px;margin:auto;padding:20px 22px 55px;position:relative;z-index:2}
+.hero{animation:fadeUp .8s var(--smooth) both;background:linear-gradient(135deg,#fffbf0,#f7eadc);background-size:200% 200%;border:1px solid #ebdcc4;border-radius:34px;padding:40px;display:flex;justify-content:space-between;align-items:center;gap:25px;box-shadow:var(--shadow);overflow:hidden;position:relative;transition:.5s var(--spring)}
+.hero:hover{box-shadow:0 26px 60px rgba(70,40,50,.16);transform:translateY(-4px)}
+.hero:after{content:"";position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(232,185,106,.18) 0%,transparent 40%);animation:gradientShift 8s ease infinite;background-size:50% 50%;pointer-events:none}
+.hero h2{font-size:42px;margin:0 0 10px;letter-spacing:-1.5px;color:var(--accent)}
+.hero p{color:var(--muted);max-width:620px;line-height:1.7;margin:0;font-size:15px}
+.hero-art{font-size:100px;opacity:.95;animation:float 3.2s ease-in-out infinite;cursor:pointer;user-select:none;transition:.4s var(--spring);position:relative;z-index:1;color:var(--accent);text-shadow:0 8px 30px rgba(122,46,59,.3)}
+.hero-art:hover{transform:scale(1.2) rotate(8deg);animation:heartbeat 1.2s ease infinite}
+.hero-art:active{transform:scale(.88) rotate(-12deg)}
+
+.section{margin-top:40px;animation:fadeUp .7s var(--smooth) both}
+.section-head{display:flex;justify-content:space-between;align-items:end;margin-bottom:16px;flex-wrap:wrap;gap:8px}
+.section h2{margin:0;font-size:24px;position:relative;display:inline-block;letter-spacing:-.5px}
+.section h2:after{content:"";position:absolute;left:0;bottom:-6px;height:4px;width:0;background:linear-gradient(90deg,var(--accent),var(--gold));border-radius:4px;transition:.6s var(--spring)}
+.section:hover h2:after{width:100%}
+.section-head span{font-size:12px;color:var(--muted);font-style:italic}
+.section-note{font-size:13px;color:var(--muted);line-height:1.6;margin:0 0 18px;max-width:760px}
+
+.song-wrap{background:linear-gradient(150deg,#fffbf0,#f7e9d8);border:1px solid #ebdcc4;border-radius:30px;padding:28px;box-shadow:0 10px 30px rgba(70,40,50,.07);position:relative;overflow:hidden;margin-bottom:22px;transition:.5s var(--spring)}
+.song-wrap:hover{transform:translateY(-4px);box-shadow:0 20px 46px rgba(70,40,50,.14);border-color:var(--gold2)}
+.song-wrap:before{content:"♪";position:absolute;top:14px;right:26px;font-size:38px;color:var(--gold);opacity:.5;animation:float 4.5s ease-in-out infinite}
+.song-wrap:after{content:"";position:absolute;bottom:-40px;left:-40px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(232,185,106,.18),transparent 70%);animation:float 6s ease-in-out infinite reverse;pointer-events:none}
+.song-title{font-size:28px;font-weight:900;margin:0 0 6px;color:var(--accent);letter-spacing:-.8px}
+.song-meta{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;font-weight:800;margin:0 0 18px}
+.lyric{font-size:18px;line-height:2.1;color:var(--ink);margin:0 0 14px;font-family:Georgia,serif;animation:slideInLeft .6s var(--smooth) both}
+.lyric:nth-child(even){animation:slideInRight .6s var(--smooth) both}
+
+/* Staff */
+.staff-wrap{background:linear-gradient(150deg,#fffdf8,#fdf3e2);border:1px solid #eadfcc;border-radius:28px;padding:26px;box-shadow:0 12px 32px rgba(70,40,50,.08);position:relative;overflow:hidden;transition:.5s var(--spring)}
+.staff-wrap:hover{box-shadow:0 20px 46px rgba(70,40,50,.14)}
+.staff-wrap:before{content:"𝄞";position:absolute;top:12px;right:24px;font-size:36px;color:var(--accent);opacity:.35;animation:float 4s ease-in-out infinite}
+.staff{width:100%;height:auto;display:block;max-width:720px;margin:0 auto}
+.staff .line{stroke:#3a2c30;stroke-width:1.4;transition:.3s}
+.staff .clef{fill:var(--accent);font-family:serif;transition:.3s}
+.staff-note{cursor:pointer;transition:.2s var(--spring)}
+.staff-note ellipse,.staff-note line,.staff-note text{transition:.25s var(--spring)}
+.staff-note:hover ellipse{fill:var(--gold);r:11}
+.staff-note:hover text{fill:var(--gold);font-weight:900}
+.staff-note.playing ellipse{fill:var(--gold);r:13;filter:drop-shadow(0 0 10px var(--gold))}
+.staff-note.playing text{fill:var(--gold);font-weight:900}
+.note-legend{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:18px}
+.legend-chip{border:1px solid #e2d2b6;background:rgba(255,253,248,.9);padding:8px 16px;border-radius:99px;font-size:13px;font-weight:800;color:var(--muted);cursor:pointer;transition:.3s var(--spring);font-family:Georgia,serif;position:relative;overflow:hidden}
+.legend-chip:hover{background:var(--accent);color:#fff;border-color:var(--accent);transform:translateY(-3px) scale(1.06);box-shadow:0 8px 20px rgba(122,46,59,.35)}
+.legend-chip.playing{background:var(--gold);color:#fff;border-color:var(--gold);transform:translateY(-3px) scale(1.1);box-shadow:0 10px 24px rgba(201,150,46,.5);animation:beat .5s ease}
+
+/* Identify */
+.identify-wrap{background:linear-gradient(150deg,#fffdf8,#fdf3e2);border:1px solid #eadfcc;border-radius:28px;padding:26px;box-shadow:0 12px 32px rgba(70,40,50,.08);position:relative;overflow:hidden}
+.identify-wrap:before{content:"🔎";position:absolute;top:14px;right:22px;font-size:28px;opacity:.4;animation:float 4s ease-in-out infinite}
+.identify-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px}
+.id-card{background:#fffdf8;border:2px solid #eadfcc;border-radius:20px;padding:18px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;transition:.4s var(--spring);position:relative;overflow:hidden;animation:bounceIn .6s var(--spring) both}
+.id-card:hover{transform:translateY(-8px) rotate(-1deg) scale(1.04);box-shadow:0 20px 42px rgba(70,40,50,.16);border-color:var(--gold2)}
+.id-card:hover .id-mini-staff .note-group{animation:noteBounce .6s ease-in-out infinite}
+.id-card.playing{border-color:var(--gold);background:linear-gradient(150deg,#fffdf8,#fbeccb);box-shadow:0 20px 42px rgba(201,150,46,.3);animation:beat .5s ease}
+.id-mini-staff{width:100%;height:90px;display:block;overflow:visible}
+.id-mini-staff .line{stroke:#3a2c30;stroke-width:1.1}
+.id-mini-staff .ledger{stroke:#3a2c30;stroke-width:1.1}
+.id-mini-staff .clef-mini{fill:var(--accent);font-family:serif;opacity:.85}
+.id-mini-staff .note-group{animation:noteAppear .7s var(--spring) both;transform-origin:center}
+.id-mini-staff .note-ellipse{transition:.25s var(--spring)}
+.id-mini-staff .note-stem{transition:.25s var(--spring)}
+.id-card.playing .id-mini-staff .note-ellipse{fill:var(--gold);transform:scale(1.25);transform-origin:center;filter:drop-shadow(0 0 6px var(--gold))}
+.id-card.playing .id-mini-staff .note-stem{stroke:var(--gold)}
+.id-card.playing .id-mini-staff .ripple-ring{animation:rippleRing .8s ease-out}
+.id-name{font-size:24px;font-weight:900;color:var(--accent);letter-spacing:-.5px;font-family:Georgia,serif}
+.id-pos{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:700;text-align:center}
+.id-desc{font-size:12px;color:var(--muted);text-align:center;line-height:1.5}
+.id-play{margin-top:6px;border:0;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;padding:8px 18px;border-radius:99px;font-size:12px;font-weight:800;cursor:pointer;transition:.35s var(--spring);box-shadow:0 8px 18px rgba(122,46,59,.25);position:relative;overflow:hidden}
+.id-play:hover{transform:translateY(-3px) scale(1.08);box-shadow:0 14px 30px rgba(122,46,59,.4)}
+.id-play:active{transform:scale(.94)}
+.id-play.playing{animation:pulse .8s ease-out}
+
+/* Quiz launch */
+.quiz-launch{background:linear-gradient(135deg,#fffdf8,#f7e9d8,#fbeacb);background-size:200% 200%;animation:gradientShift 12s ease infinite;border:1px solid #eadfcc;border-radius:32px;padding:44px;box-shadow:var(--shadow);text-align:center;position:relative;overflow:hidden;transition:.5s var(--spring)}
+.quiz-launch:hover{transform:translateY(-5px);box-shadow:0 26px 60px rgba(70,40,50,.16)}
+.quiz-launch:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 30% 30%,rgba(232,185,106,.2),transparent 50%);animation:gradientShift 6s ease infinite;pointer-events:none}
+.quiz-launch h3{margin:0 0 10px;font-size:30px;position:relative;letter-spacing:-.8px}
+.quiz-launch p{color:var(--muted);margin:0 0 26px;position:relative;font-size:15px}
+.launch-btn{position:relative;display:inline-flex;align-items:center;gap:12px;border:0;padding:20px 42px;font-size:18px;font-weight:800;color:#fff;border-radius:99px;cursor:pointer;overflow:hidden;background:linear-gradient(135deg,var(--accent),var(--accent2),var(--gold));background-size:200% 200%;animation:gradientShift 4s ease infinite,glow 3s ease infinite;transition:.4s var(--spring);box-shadow:0 16px 38px rgba(122,46,59,.35)}
+.launch-btn:hover{transform:translateY(-6px) scale(1.08);box-shadow:0 26px 55px rgba(122,46,59,.5)}
+.launch-btn:active{transform:scale(.95)}
+.launch-btn .arrow{transition:.4s var(--spring);display:inline-block}
+.launch-btn:hover .arrow{transform:translate(8px,-6px) rotate(14deg)}
+
+footer{text-align:center;color:#a09598;font-size:12.5px;padding:32px;position:relative;z-index:2;font-weight:500}
+footer span{display:inline-block;animation:float 3s ease-in-out infinite;font-weight:700;color:var(--accent)}
+
+.ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,.75);transform:scale(0);animation:ripple .7s var(--smooth);pointer-events:none}
+
+/* Quiz overlay */
+.quiz-overlay{position:fixed;inset:0;background:linear-gradient(135deg,#fbf7ef,#f6efe2);z-index:500;overflow-y:auto;animation:fadeUp .4s var(--smooth) both;padding:24px}
+.quiz-overlay.hidden{display:none}
+.quiz-frame{max-width:720px;margin:0 auto}
+.quiz-topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.quiz-brand{display:flex;align-items:center;gap:10px;font-weight:800}
+.quiz-brand .logo{width:40px;height:40px;border-radius:14px;font-size:22px}
+.close-btn{border:0;background:rgba(255,253,248,.9);color:var(--muted);padding:10px 18px;border-radius:14px;cursor:pointer;font-weight:700;transition:.3s var(--spring)}
+.close-btn:hover{background:#fff;color:var(--accent);transform:translateY(-3px) scale(1.06) rotate(-2deg);box-shadow:0 8px 20px rgba(70,40,50,.15)}
+.quiz-card{background:rgba(255,253,248,.96);backdrop-filter:blur(10px);border:1px solid #eadfcc;border-radius:32px;padding:34px;box-shadow:0 24px 60px rgba(70,40,50,.16);position:relative;overflow:hidden}
+.quiz-card:before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,transparent 40%,rgba(232,185,106,.1) 70%,transparent);background-size:200% 200%;animation:gradientShift 8s ease infinite;pointer-events:none}
+.progress-track{height:14px;background:#efe2cc;border-radius:99px;overflow:hidden;margin-bottom:18px;position:relative}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--gold2),var(--accent),var(--accent2));background-size:200% 200%;border-radius:99px;transition:width .6s var(--spring);width:0%;animation:gradientShift 3s ease infinite}
+.stats{display:flex;gap:20px;font-size:13px;color:var(--muted);margin-bottom:18px;flex-wrap:wrap;justify-content:center}
+.stats b{color:var(--ink);font-size:18px;font-weight:900}
+.stats .streak-fire{color:var(--accent);font-weight:800}
+.sparkle-stage{height:60px;display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:14px;pointer-events:none;position:relative;overflow:hidden}
+.sparkle-stage .stage-sparkle{position:absolute;font-size:28px;animation:sparkleFloat 1.5s var(--smooth) forwards;opacity:0}
+@keyframes sparkleFloat{0%{transform:translateY(25px) scale(0) rotate(0);opacity:0}30%{transform:translateY(-8px) scale(1.25) rotate(150deg);opacity:1}60%{transform:translateY(-18px) scale(1) rotate(280deg);opacity:1}100%{transform:translateY(-52px) scale(.5) rotate(380deg);opacity:0}}
+.sparkle-stage .stage-label{color:var(--green);font-weight:900;font-size:15px;opacity:0;transition:opacity .3s;letter-spacing:.03em}
+.sparkle-stage.show-label .stage-label{opacity:1;animation:beat .5s ease}
+.prompt-label{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--accent);font-weight:800;text-align:center;margin-bottom:8px}
+.quiz-word{font-size:64px;font-weight:900;line-height:1.15;text-align:center;margin-bottom:8px;letter-spacing:-1.5px;color:var(--accent);
+animation:pop .5s var(--spring) both;font-family:Georgia,serif;word-break:break-word}
+.quiz-py{color:var(--accent);font-size:17px;text-align:center;min-height:24px;font-weight:700;font-style:italic}
+.quiz-hint{color:var(--ink);opacity:.65;font-size:13px;text-align:center;margin-top:6px;min-height:18px}
+.speak-row{display:flex;justify-content:center;margin:16px 0 24px}
+.speak-btn{border:0;background:linear-gradient(135deg,#f5e8d0,#ecd9b8);color:var(--accent);width:68px;height:68px;border-radius:50%;font-size:28px;cursor:pointer;transition:.4s var(--spring);box-shadow:0 10px 26px rgba(122,46,59,.22)}
+.speak-btn:hover{transform:scale(1.18) rotate(10deg);box-shadow:0 16px 38px rgba(122,46,59,.45);animation:heartbeat .8s ease}
+.speak-btn:active{transform:scale(.9)}
+.speak-btn.playing{animation:pulse .8s ease-out,beat .6s ease}
+.speak-btn.hidden{display:none}
+.answers{display:grid;gap:14px;grid-template-columns:1fr 1fr;margin-top:10px}
+.answer{border:2px solid #e2d2b6;background:#fffdf8;color:var(--ink);padding:18px 20px;border-radius:20px;cursor:pointer;transition:.4s var(--spring);font-size:17px;font-weight:800;display:flex;justify-content:space-between;align-items:center;gap:10px;text-align:left;font-family:inherit;position:relative;overflow:hidden}
+.answer:hover:not(:disabled){transform:translateY(-6px) scale(1.05);border-color:var(--accent);background:#fff6e6;box-shadow:0 16px 36px rgba(70,40,50,.18)}
+.answer:active:not(:disabled){transform:scale(.97)}
+.answer:disabled{cursor:default;color:var(--ink);opacity:1}
+.answer .mark{font-weight:900;font-size:22px;opacity:0;transform:scale(0);transition:.3s var(--spring)}
+.answer.correct{background:linear-gradient(135deg,#eaf0e2,#d8e6cf);border-color:var(--green);color:#3b543e;animation:beat .5s ease}
+.answer.correct .mark{opacity:1;transform:scale(1);color:var(--green)}
+.answer.correct .mark:before{content:"✓"}
+.answer.wrong{background:linear-gradient(135deg,#fbe3df,#f6d0ca);border-color:var(--red);color:#7a2b25;animation:shake .5s}
+.answer.wrong .mark{opacity:1;transform:scale(1);color:var(--red)}
+.answer.wrong .mark:before{content:"✕"}
+.answer.dim{opacity:.6;color:var(--muted)}
+.result{text-align:center;margin-top:22px;font-size:16px;font-weight:800;min-height:26px;transition:.3s}
+.result.good{color:var(--green);animation:pop .4s var(--spring)}
+.result.bad{color:var(--red);animation:pop .4s var(--spring)}
+.actions{display:flex;gap:14px;justify-content:center;margin-top:26px;flex-wrap:wrap}
+.btn{border:0;padding:16px 32px;border-radius:18px;cursor:pointer;font-weight:800;font-size:15px;transition:.4s var(--spring);font-family:inherit;position:relative;overflow:hidden}
+.btn-primary{color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent2));background-size:200% 200%;animation:gradientShift 4s ease infinite}
+.btn-primary:hover:not(:disabled){transform:translateY(-5px) scale(1.07);box-shadow:0 20px 42px rgba(122,46,59,.45)}
+.btn-primary:active:not(:disabled){transform:scale(.96)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;animation:none;background:#d8c8b8;color:#fff}
+.btn-ghost{background:#f5e8d0;color:var(--accent)}
+.btn-ghost:hover{background:#ecd9b8;transform:translateY(-5px) scale(1.07)}
+.done{text-align:center;padding:24px 10px;animation:bounceIn .7s var(--spring) both}
+.done .big{font-size:96px;line-height:1;margin-bottom:16px;animation:float 2.6s ease-in-out infinite}
+.done h3{margin:0 0 10px;font-size:32px;letter-spacing:-.8px}
+.done .score-line{font-size:48px;font-weight:900;color:var(--accent);margin:10px 0;letter-spacing:-1.5px}
+.done p{color:var(--muted);margin:0 0 26px;font-size:15px}
+
+@media(max-width:520px){
+  .answers{grid-template-columns:1fr}
+  .quiz-word{font-size:40px}
+  .quiz-overlay{padding:14px}
+  .quiz-card{padding:24px}
+  .hero-art{font-size:64px}
+  .hero h2{font-size:32px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand"><div class="logo" onclick="wiggleLogo(this)">♪</div><div><h1>Insight Music</h1><p>Learn & Play · DO RE MI FA SOL LA TI DO</p></div></div>
+  <nav>
+    <button class="nav active" data-go="home">Home</button>
+    <button class="nav" data-go="songs">Songs</button>
+    <button class="nav" data-go="notes">Notes</button>
+    <button class="nav" data-go="identify">Identify</button>
+    <button class="nav" data-go="quiz">Practice</button>
+  </nav>
+</header>
+
+<main>
+<section class="hero" id="home">
+  <div>
+    <h2>Welcome to Insight Music ♪</h2>
+    <p>Sing, listen, and read music — from middle DO to high DO. Learn each note by ear, then test yourself with listening and vocabulary practice.</p>
+  </div>
+  <div class="hero-art" onclick="playNote('do',1.4); burst(this)" title="Tap to hear middle DO" aria-label="Hear middle DO">𝄞</div>
+</section>
+
+<section class="section" id="songs">
+  <div class="section-head"><h2>Songs</h2><span>Read along · sing the melody</span></div>
+  <p class="section-note">Taffy and Come with Me — read the lyrics and follow the melody line by line.</p>
+  <div id="songsWrap"></div>
+</section>
+
+<section class="section" id="notes">
+  <div class="section-head"><h2>Note identification · DO to high DO</h2><span>Treble clef · movable DO</span></div>
+  <p class="section-note">Tap any note on the staff or chip below to hear it. Notes go from middle DO (below the staff) up to high DO.</p>
+  <div class="staff-wrap">
+    <svg class="staff" viewBox="0 0 720 260" id="staffSvg"></svg>
+    <div class="note-legend" id="noteLegend"></div>
+  </div>
+</section>
+
+<section class="section" id="identify">
+  <div class="section-head"><h2>How to identify music notes</h2><span>See · hear · remember</span></div>
+  <p class="section-note">Each card shows where a note really sits on the treble staff. Tap the card to hear it — the higher the note sits, the higher it sounds.</p>
+  <div class="identify-wrap">
+    <div class="identify-grid" id="identifyGrid"></div>
+  </div>
+</section>
+
+<section class="section" id="quiz">
+  <div class="section-head"><h2>Practice</h2><span>Listening + song vocabulary</span></div>
+  <div class="quiz-launch">
+    <h3>Ready to test yourself? 🎧</h3>
+    <p>12 questions — some play a note (pick which you heard), some ask about words from the songs.</p>
+    <button class="launch-btn" onclick="openQuiz()">Start Practice <span class="arrow">→</span></button>
+  </div>
+</section>
+</main>
+
+<footer>Insight Music · <span>Listen closely. Sing proudly.</span></footer>
+
+<div class="quiz-overlay hidden" id="quizOverlay">
+  <div class="quiz-frame">
+    <div class="quiz-topbar">
+      <div class="quiz-brand"><div class="logo">♪</div><span>Practice</span></div>
+      <button class="close-btn" onclick="closeQuiz()">Close ✕</button>
+    </div>
+    <div class="quiz-card" id="quizCard">
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="stats">
+        <span>Question <b id="qNum">1</b>/<b id="qTotal">12</b></span>
+        <span>Score <b id="scoreNum">0</b></span>
+        <span class="streak-fire">🔥 <b id="streakNum">0</b></span>
+      </div>
+      <div class="sparkle-stage" id="sparkleStage"><span class="stage-label" id="stageLabel">✓ Correct!</span></div>
+      <div class="prompt-label" id="promptLabel">Which note did you hear?</div>
+      <div class="quiz-word" id="quizWord">?</div>
+      <div class="quiz-py" id="quizPy">tap 🔊 to hear it again</div>
+      <div class="quiz-hint" id="quizHint"></div>
+      <div class="speak-row">
+        <button class="speak-btn" id="speakBtn" aria-label="Hear the note">🔊</button>
+      </div>
+      <div class="answers" id="answers"></div>
+      <div class="result" id="result"></div>
+    </div>
+    <div class="actions" id="actions" style="margin-top:26px">
+      <button class="btn btn-primary" id="nextBtn" disabled>Next →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   Floating background notes
+   ============================================================ */
+(function floatingNotes(){
+  const glyphs = ["♪","♫","♩","♬"];
+  for(let i=0;i<12;i++){
+    const el = document.createElement("div");
+    el.className = "bg-note";
+    el.textContent = glyphs[Math.floor(Math.random()*glyphs.length)];
+    el.style.left = (Math.random()*100) + "vw";
+    el.style.top = (Math.random()*100) + "vh";
+    el.style.fontSize = (20 + Math.random()*46) + "px";
+    el.style.animation = `drift ${12+Math.random()*12}s linear infinite, floatNote ${4+Math.random()*4}s ease-in-out infinite`;
+    el.style.animationDelay = `${Math.random()*8}s, ${Math.random()*3}s`;
+    document.body.appendChild(el);
+  }
+})();
+
+/* ============================================================
+   GRAND PIANO SYNTHESIS
+   Grand piano timbre = bright hammer attack (rich upper partials
+   for ~150ms) + warm sustained tail (fundamental dominates).
+   I use TWO gain envelopes: a bright transient layer and a
+   warm sustain layer, summed.
+   ============================================================ */
+let audioCtx = null;
+function getCtx(){
+  if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if(audioCtx.state === "suspended") audioCtx.resume();
+  return audioCtx;
+}
+const NOTE_FREQ = {
+  do:  261.63, re:  293.66, mi:  329.63, fa:  349.23,
+  sol: 392.00, la:  440.00, ti:  493.88, do2: 523.25
+};
+
+function playNote(name, dur=1.4, when=0, dynamic="mf"){
+  const ctx = getCtx();
+  const t0 = ctx.currentTime + when;
+  const freq = NOTE_FREQ[name] || 261.63;
+
+  const peak = dynamic === "ff" ? 0.42 : dynamic === "pp" ? 0.07 : dynamic === "p" ? 0.13 : dynamic === "f" ? 0.30 : 0.22;
+
+  /* Master bus */
+  const master = ctx.createGain();
+  master.gain.value = peak;
+  master.connect(ctx.destination);
+
+  /* --- WARM SUSTAIN layer (fundamental + mild 2nd) --- */
+  const sustainBus = ctx.createGain();
+  sustainBus.gain.setValueAtTime(0, t0);
+  sustainBus.gain.linearRampToValueAtTime(1.0, t0 + 0.005);
+  sustainBus.gain.exponentialRampToValueAtTime(0.55, t0 + 0.20);  // initial drop
+  sustainBus.gain.exponentialRampToValueAtTime(0.0001, t0 + dur); // long tail
+  sustainBus.connect(master);
+
+  // warm partials with gentle sine/triangle
+  const warmPartials = [
+    { mult:1, gain:1.00, decay:1.00, type:"triangle" },
+    { mult:2, gain:0.35, decay:0.85, type:"sine" },
+    { mult:3, gain:0.10, decay:0.60, type:"sine" }
+  ];
+  warmPartials.forEach(p => {
+    const osc = ctx.createOscillator();
+    const g = ctx.createGain();
+    osc.type = p.type;
+    osc.frequency.value = freq * p.mult;
+    g.gain.setValueAtTime(p.gain, t0);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur * p.decay);
+    osc.connect(g); g.connect(sustainBus);
+    osc.start(t0); osc.stop(t0 + dur + 0.05);
+  });
+
+  /* --- BRIGHT TRANSIENT layer (rich upper partials, dies fast) --- */
+  const brightBus = ctx.createGain();
+  brightBus.gain.setValueAtTime(0, t0);
+  brightBus.gain.linearRampToValueAtTime(0.85, t0 + 0.004);
+  brightBus.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.28); // dies in ~280ms
+  brightBus.connect(master);
+
+  const brightPartials = [
+    { mult:1, gain:0.15, type:"sawtooth" },  // slight bite on the fundamental
+    { mult:2, gain:0.22, type:"sine" },
+    { mult:3, gain:0.18, type:"sine" },
+    { mult:4, gain:0.12, type:"sine" },
+    { mult:5, gain:0.08, type:"sine" },
+    { mult:6, gain:0.05, type:"sine" },
+    { mult:7, gain:0.03, type:"sine" },
+    { mult:8, gain:0.02, type:"sine" }
+  ];
+  brightPartials.forEach(p => {
+    const osc = ctx.createOscillator();
+    const g = ctx.createGain();
+    osc.type = p.type;
+    osc.frequency.value = freq * p.mult;
+    g.gain.value = p.gain;
+    osc.connect(g); g.connect(brightBus);
+    osc.start(t0); osc.stop(t0 + 0.35);
+  });
+
+  /* --- SUB layer: quiet fundamental one octave down for body --- */
+  const sub = ctx.createOscillator();
+  const subG = ctx.createGain();
+  sub.type = "sine";
+  sub.frequency.value = freq / 2;
+  subG.gain.setValueAtTime(0.18, t0);
+  subG.gain.exponentialRampToValueAtTime(0.0001, t0 + dur * 0.7);
+  sub.connect(subG); subG.connect(master);
+  sub.start(t0); sub.stop(t0 + dur);
+
+  /* --- Hammer noise click --- */
+  const noise = ctx.createBufferSource();
+  const nBuf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.015), ctx.sampleRate);
+  const nData = nBuf.getChannelData(0);
+  for(let i=0;i<nData.length;i++) nData[i] = (Math.random()*2-1) * Math.pow(1 - i/nData.length, 4);
+  noise.buffer = nBuf;
+  const nGain = ctx.createGain();
+  nGain.gain.value = 0.03 * (peak/0.22);
+  noise.connect(nGain); nGain.connect(ctx.destination);
+  noise.start(t0); noise.stop(t0 + 0.025);
+}
+
+/* ============================================================
+   Sparkle / Ripple / Logo
+   ============================================================ */
+function burst(el){
+  const emojis = ["♪","♫","♩","✨","🌟","🎵","💫","🎶"];
+  const rect = el.getBoundingClientRect();
+  for(let i=0;i<10;i++){
+    const s = document.createElement("div");
+    s.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+    s.style.cssText = `position:fixed;left:${rect.left+rect.width/2}px;top:${rect.top+rect.height/2}px;font-size:${16+Math.random()*22}px;pointer-events:none;z-index:9999;color:var(--accent);font-family:serif;`;
+    document.body.appendChild(s);
+    const angle = (Math.PI*2*i)/10 + Math.random()*.5;
+    const dist = 70 + Math.random()*70;
+    const dx = Math.cos(angle)*dist, dy = Math.sin(angle)*dist - 25;
+    s.animate([
+      {transform:"translate(0,0) scale(0) rotate(0)",opacity:0},
+      {transform:`translate(${dx*.5}px,${dy*.5}px) scale(1.4) rotate(180deg)`,opacity:1,offset:.5},
+      {transform:`translate(${dx}px,${dy}px) scale(0) rotate(360deg)`,opacity:0}
+    ],{duration:950+Math.random()*450,easing:"cubic-bezier(.22,1,.36,1)"}).onfinish=()=>s.remove();
+  }
+}
+function wiggleLogo(el){ el.style.animation="wiggle .6s ease"; burst(el); setTimeout(()=>el.style.animation="",600); }
+
+document.addEventListener("click", e=>{
+  const btn = e.target.closest(".nav, .answer, .launch-btn, .legend-chip, .id-play, .id-card, .close-btn, .btn");
+  if(!btn) return;
+  const rect = btn.getBoundingClientRect();
+  const size = Math.max(rect.width, rect.height);
+  const r = document.createElement("span");
+  r.className = "ripple";
+  r.style.width = r.style.height = size + "px";
+  r.style.left = (e.clientX - rect.left - size/2) + "px";
+  r.style.top = (e.clientY - rect.top - size/2) + "px";
+  if(getComputedStyle(btn).position === "static") btn.style.position = "relative";
+  btn.appendChild(r);
+  setTimeout(()=>r.remove(),700);
+});
+
+document.querySelectorAll(".nav").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll(".nav").forEach(x=>x.classList.remove("active"));
+  b.classList.add("active");
+  if(b.dataset.go === "quiz"){ openQuiz(); return; }
+  const el=document.getElementById(b.dataset.go);
+  if(el) el.scrollIntoView({behavior:"smooth",block:"start"});
+});
+
+/* ============================================================
+   Songs
+   ============================================================ */
+const songs = [
+  {
+    title:"Taffy",
+    meta:"Traditional Welsh folk song · DO to high DO and back",
+    lines:[
+      "Taffy was a Welsh man, Taffy was a thief,",
+      "Taffy came to our house and stole a leg of beef.",
+      "I went to Taffy's house, Taffy was not home.",
+      "Taffy came to our house and stole a marrow bone.",
+      "I went to Taffy's house, Taffy was in bed.",
+      "I took a marrow bone and hit him on the head (whack!)"
+    ]
+  },
+  {
+    title:"Come with Me",
+    meta:"Traditional round",
+    lines:[
+      "Come with me where flowers bloom,",
+      "in this love-ly gar-den.",
+      "Birds all sing a happy tune,",
+      "in this lovely garden.",
+      "There the sun shines ev-ry day,",
+      "everybody feels so gay.",
+      "Let's all sing and dance and play,",
+      "in this lovely garden."
+    ]
+  }
+];
+
+const songsWrap = document.getElementById("songsWrap");
+songsWrap.innerHTML = songs.map((s, si) => `
+  <div class="song-wrap" style="animation-delay:${si*.12}s">
+    <h3 class="song-title">${s.title}</h3>
+    <p class="song-meta">${s.meta}</p>
+    ${s.lines.map((line, li) => `
+      <p class="lyric" style="animation-delay:${(si*0.15)+(li*0.06)}s">${line}</p>
+    `).join("")}
+  </div>
+`).join("");
+
+/* ============================================================
+   Main staff — accurate treble clef positions
+   Staff lines (top→bottom): y = 72, 100, 128, 156, 184
+   Treble positions:
+     High DO (C5) → ledger above middle (y = 58, ledger at 58)
+       wait: in treble clef, C5 sits in 3rd space (between line 3 and 4)
+     Actually with our staff lines: line1=top=72, line5=bottom=184
+       Treble lines: E G B D F (bottom to top)
+       So bottom line (184) = E4 → MI
+          bottom space (170) = F4 → FA
+          line 4 (156) = G4 → SOL
+          space (142) = A4 → LA
+          line 3 (128) = B4 → TI
+          space (114) = C5 → DO'
+       Middle DO (C4) sits one ledger below the staff → y = 212
+          space below bottom line (198) = D4 → RE
+   ============================================================ */
+const staffNotes = [
+  { name:"do",  label:"DO",  y:212, ledger:true  },  // ledger line below staff
+  { name:"re",  label:"RE",  y:198, ledger:false },  // space below bottom line
+  { name:"mi",  label:"MI",  y:184, ledger:false },  // bottom line
+  { name:"fa",  label:"FA",  y:170, ledger:false },  // first space
+  { name:"sol", label:"SOL", y:156, ledger:false },  // fourth line
+  { name:"la",  label:"LA",  y:142, ledger:false },  // second space
+  { name:"ti",  label:"TI",  y:128, ledger:false },  // middle line
+  { name:"do2", label:"DO′", y:114, ledger:false }   // third space
+];
+function drawStaff(){
+  const svg = document.getElementById("staffSvg");
+  const W = 720;
+  const lineY = [72, 100, 128, 156, 184];
+  let html = "";
+  lineY.forEach((y,i) => {
+    html += `<line class="line" x1="40" y1="${y}" x2="${W-40}" y2="${y}" style="animation:slideInLeft .5s var(--smooth) ${i*.06}s both"/>`;
+  });
+  html += `<text x="60" y="200" font-size="150" class="clef" text-anchor="middle" style="animation:bounceIn .7s var(--spring) .2s both">𝄞</text>`;
+  const startX = 180, stepX = (W - startX - 100) / (staffNotes.length - 1);
+  staffNotes.forEach((n, i) => {
+    const x = startX + i*stepX;
+    const y = n.y;
+    if(n.ledger){
+      html += `<line class="line" x1="${x-18}" y1="${y}" x2="${x+18}" y2="${y}"/>`;
+    }
+    html += `<g class="staff-note" data-name="${n.name}" data-idx="${i}" onclick="playNote('${n.name}',1.4);highlightNote(${i})" style="animation:bounceIn .55s var(--spring) ${.3+i*.07}s both">
+      <ellipse cx="${x}" cy="${y}" rx="9" ry="6.5" fill="#7a2e3b" transform="rotate(-20 ${x} ${y})"/>
+      <line x1="${x+9}" y1="${y}" x2="${x+9}" y2="${y-38}" stroke="#7a2e3b" stroke-width="1.7"/>
+      <text x="${x}" y="${y+34}" text-anchor="middle" font-size="13" font-weight="800" fill="#2e2028" font-family="Inter,sans-serif">${n.label}</text>
+    </g>`;
+  });
+  svg.innerHTML = html;
+
+  const legend = document.getElementById("noteLegend");
+  legend.innerHTML = staffNotes.map((n,i) =>
+    `<button class="legend-chip" data-idx="${i}" style="animation:bounceIn .5s var(--spring) ${i*.05}s both" onclick="playNote('${n.name}',1.4);highlightNote(${i})">${n.label}</button>`
+  ).join("");
+}
+function highlightNote(i){
+  document.querySelectorAll(".staff-note").forEach(g => g.classList.remove("playing"));
+  document.querySelectorAll(".legend-chip").forEach(c => c.classList.remove("playing"));
+  const g = document.querySelector(`.staff-note[data-idx="${i}"]`);
+  const c = document.querySelector(`.legend-chip[data-idx="${i}"]`);
+  if(g) g.classList.add("playing");
+  if(c) c.classList.add("playing");
+  setTimeout(()=>{ if(g) g.classList.remove("playing"); if(c) c.classList.remove("playing"); }, 1000);
+}
+drawStaff();
+
+/* ============================================================
+   Identify — mini staffs with CORRECT treble positions
+   viewBox 220 x 100, staff lines at y = 30, 45, 60, 75, 90
+   Spacing 15px.
+   Treble (bottom→top): line E4, space F4, line G4, space A4,
+                        line B4, space C5, line D5, space E5
+   Map:
+     Middle DO (C4): one ledger line below staff → y = 105
+     RE (D4):       space below bottom line       → y = 97.5
+     MI (E4):       bottom line                   → y = 90
+     FA (F4):       first space                   → y = 82.5
+     SOL (G4):      second line (from bottom)     → y = 75
+     LA (A4):       second space                  → y = 67.5
+     TI (B4):       middle line                   → y = 60
+     DO' (C5):      third space                   → y = 52.5
+   ============================================================ */
+const miniLineYs = [30, 45, 60, 75, 90];
+const identifyNotes = [
+  { name:"do",  label:"DO",  position:"Ledger line below", y:105, ledger:true,  desc:"Sits on a ledger line below the staff. The lowest note we use." },
+  { name:"re",  label:"RE",  position:"Space below staff",  y:97.5, ledger:false, desc:"In the space just below the bottom line." },
+  { name:"mi",  label:"MI",  position:"Bottom line",        y:90,  ledger:false, desc:"Rests right on the lowest line of the staff." },
+  { name:"fa",  label:"FA",  position:"First space",        y:82.5, ledger:false, desc:"In the first space above the bottom line." },
+  { name:"sol", label:"SOL", position:"Second line",        y:75,  ledger:false, desc:"On the second line from the bottom." },
+  { name:"la",  label:"LA",  position:"Second space",       y:67.5, ledger:false, desc:"In the second space from the bottom." },
+  { name:"ti",  label:"TI",  position:"Middle line",        y:60,  ledger:false, desc:"On the middle line of the staff." },
+  { name:"do2", label:"DO′", position:"Third space",        y:52.5, ledger:false, desc:"One octave above middle DO — the highest note we use." }
+];
+
+function miniStaffSVG(noteY, ledger){
+  const W = 220, H = 110;
+  let s = `<svg class="id-mini-staff" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">`;
+  // staff lines
+  miniLineYs.forEach(y => { s += `<line class="line" x1="30" y1="${y}" x2="${W-30}" y2="${y}"/>`; });
+  // tiny treble clef
+  s += `<text class="clef-mini" x="42" y="88" font-size="52" text-anchor="middle">𝄞</text>`;
+  // ledger line for middle DO
+  if(ledger){
+    s += `<line class="ledger" x1="${W/2-18}" y1="${noteY}" x2="${W/2+18}" y2="${noteY}"/>`;
+  }
+  // note with stem
+  const stemUp = noteY > 60; // notes below middle get stems up
+  const stemX = stemUp ? (W/2 + 7) : (W/2 - 7);
+  const stemY2 = stemUp ? (noteY - 34) : (noteY + 34);
+  s += `<g class="note-group" style="animation-delay:.4s">`;
+  s += `<circle class="ripple-ring" cx="${W/2}" cy="${noteY}" r="8" fill="none" stroke="var(--gold)" stroke-width="0" opacity="0"/>`;
+  s += `<ellipse class="note-ellipse" cx="${W/2}" cy="${noteY}" rx="7.5" ry="5.5" fill="#7a2e3b" transform="rotate(-20 ${W/2} ${noteY})"/>`;
+  s += `<line class="note-stem" x1="${stemX}" y1="${noteY}" x2="${stemX}" y2="${stemY2}" stroke="#7a2e3b" stroke-width="1.6"/>`;
+  s += `</g>`;
+  s += `</svg>`;
+  return s;
+}
+
+const idGrid = document.getElementById("identifyGrid");
+idGrid.innerHTML = identifyNotes.map((n, i) => `
+  <div class="id-card" data-idx="${i}" style="animation-delay:${i*.08}s" onclick="playNote('${n.name}',1.4); flashId(${i})">
+    ${miniStaffSVG(n.y, n.ledger)}
+    <div class="id-name">${n.label}</div>
+    <div class="id-pos">${n.position}</div>
+    <div class="id-desc">${n.desc}</div>
+    <button class="id-play" onclick="event.stopPropagation();playNote('${n.name}',1.4); flashId(${i}); burst(this)">▶ Hear it</button>
+  </div>
+`).join("");
+
+function flashId(i){
+  document.querySelectorAll(".id-card").forEach(c => c.classList.remove("playing"));
+  const card = document.querySelector(`.id-card[data-idx="${i}"]`);
+  if(card){
+    card.classList.add("playing");
+    setTimeout(()=>card.classList.remove("playing"), 950);
+  }
+}
+
+/* ============================================================
+   QUIZ — note listening + song vocabulary
+   ============================================================ */
+const QUIZ_NOTES = ["do","re","mi","sol"];
+const NOTE_LABEL = { do:"DO", re:"RE", mi:"MI", sol:"SOL" };
+
+const SONG_VOCAB = [
+  // Taffy
+  { word:"Taffy",   definition:"The name of the Welsh man in the song." },
+  { word:"thief",   definition:"A person who steals." },
+  { word:"stole",   definition:"Took something that wasn't theirs." },
+  { word:"leg of beef", definition:"A cut of meat from a cow." },
+  { word:"marrow bone", definition:"A bone with soft tissue inside." },
+  { word:"whack",   definition:"A loud hit sound." },
+  // Come with Me
+  { word:"bloom",   definition:"To open up and flower." },
+  { word:"garden",  definition:"A place where flowers and plants grow." },
+  { word:"tune",    definition:"A melody — a line of music." },
+  { word:"gay",     definition:"Happy and cheerful (old-fashioned word)." },
+  { word:"lovely",  definition:"Very beautiful or pleasant." }
+];
+
+const TOTAL = 12;
+
+let questions=[], current=0, score=0, streak=0, bestStreak=0, answered=false;
+
+const el = {
+  overlay: document.getElementById("quizOverlay"),
+  card: document.getElementById("quizCard"),
+  actions: document.getElementById("actions"),
+  qNum: document.getElementById("qNum"),
+  qTotal: document.getElementById("qTotal"),
+  score: document.getElementById("scoreNum"),
+  streak: document.getElementById("streakNum"),
+  progress: document.getElementById("progressFill"),
+  stage: document.getElementById("sparkleStage"),
+  stageLabel: document.getElementById("stageLabel"),
+  word: document.getElementById("quizWord"),
+  py: document.getElementById("quizPy"),
+  hint: document.getElementById("quizHint"),
+  label: document.getElementById("promptLabel"),
+  answers: document.getElementById("answers"),
+  result: document.getElementById("result"),
+  next: document.getElementById("nextBtn"),
+  speakBtn: document.getElementById("speakBtn")
+};
+
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+function openQuiz(){
+  el.overlay.classList.remove("hidden");
+  document.body.style.overflow = "hidden";
+  startQuiz();
+}
+function closeQuiz(){
+  el.overlay.classList.add("hidden");
+  document.body.style.overflow = "";
+}
+document.addEventListener("keydown", e=>{
+  if(e.key === "Escape" && !el.overlay.classList.contains("hidden")) closeQuiz();
+});
+
+/* Build the mixed question pool.
+   8 note questions + 4 vocab questions, shuffled. */
+function buildQuestionPool(){
+  const pool = [];
+
+  // Note listening questions (cycle through DO RE MI SOL)
+  const notePool = [];
+  while(notePool.length < 8){
+    shuffle(QUIZ_NOTES).forEach(n => { if(notePool.length < 8) notePool.push(n); });
+  }
+  notePool.forEach(n => {
+    pool.push({ type:"note", answer: n });
+  });
+
+  // Vocab questions — pick 4 random vocab items
+  shuffle(SONG_VOCAB).slice(0, 4).forEach(v => {
+    pool.push({ type:"vocab", answer: v.word, vocab: v });
+  });
+
+  return shuffle(pool);
+}
+
+function startQuiz(){
+  questions = buildQuestionPool();
+  current = 0; score = 0; streak = 0; bestStreak = 0; answered = false;
+  el.qTotal.textContent = TOTAL;
+  el.actions.style.display = "";
+  el.actions.innerHTML = '<button class="btn btn-primary" id="nextBtn" disabled>Next →</button>';
+  el.next = document.getElementById("nextBtn");
+  el.next.onclick = nextQuestion;
+  renderQuiz();
+  updateStats();
+}
+function updateStats(){
+  el.qNum.textContent = Math.min(current+1, TOTAL);
+  el.qTotal.textContent = TOTAL;
+  el.score.textContent = score;
+  el.streak.textContent = streak;
+  el.progress.style.width = ((current)/TOTAL*100) + "%";
+}
+function clearStage(){
+  el.stage.querySelectorAll(".stage-sparkle").forEach(s=>s.remove());
+  el.stage.classList.remove("show-label");
+}
+function playStageSparkles(label){
+  clearStage();
+  el.stageLabel.textContent = label;
+  el.stage.classList.add("show-label");
+  const emojis = ["♪","♫","✨","🌟","🎵","🎶","💫"];
+  for(let i=0;i<8;i++){
+    const s = document.createElement("span");
+    s.className = "stage-sparkle";
+    s.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+    s.style.left = (6 + Math.random()*88) + "%";
+    s.style.animationDelay = (i*0.05) + "s";
+    s.style.fontSize = (20 + Math.random()*18) + "px";
+    el.stage.appendChild(s);
+  }
+  setTimeout(()=>el.stage.classList.remove("show-label"), 1300);
+}
+
+function renderQuiz(){
+  answered = false;
+  clearStage();
+  el.result.textContent = "";
+  el.result.className = "result";
+  el.next.disabled = true;
+
+  const q = questions[current];
+
+  if(q.type === "note"){
+    /* Listening question */
+    el.word.textContent = "?";
+    el.word.style.fontSize = "";
+    el.word.style.animation = "none";
+    void el.word.offsetWidth;
+    el.word.style.animation = "pop .5s var(--spring) both";
+    el.py.textContent = "tap 🔊 to hear the note";
+    el.label.textContent = "Which note did you hear?";
+    el.hint.textContent = "Notes: DO · RE · MI · SOL";
+    el.speakBtn.classList.remove("hidden");
+
+    setTimeout(()=>playNote(q.answer, 1.4), 400);
+
+    let html = "";
+    QUIZ_NOTES.forEach((n, i) => {
+      html += `<button class="answer" data-val="${n}" style="animation:bounceIn .5s var(--spring) ${i*.07}s both">
+                <span>${NOTE_LABEL[n]}</span><span class="mark"></span>
+               </button>`;
+    });
+    el.answers.innerHTML = html;
+    el.answers.querySelectorAll(".answer").forEach(b=>{
+      b.onclick = () => chooseAnswer(b, b.dataset.val, q.answer, q);
+    });
+  } else {
+    /* Vocab question */
+    el.word.textContent = q.vocab.word;
+    el.word.style.fontSize = "";
+    el.word.style.animation = "none";
+    void el.word.offsetWidth;
+    el.word.style.animation = "pop .5s var(--spring) both";
+    el.py.textContent = "from the songs";
+    el.label.textContent = "What does this word mean?";
+    el.hint.textContent = "Song vocabulary";
+    el.speakBtn.classList.add("hidden");
+
+    // Build 4 choices — the correct definition + 3 distractors
+    const distractors = shuffle(SONG_VOCAB.filter(v => v.word !== q.vocab.word)).slice(0, 3);
+    const opts = shuffle([q.vocab].concat(distractors));
+
+    let html = "";
+    opts.forEach((opt, i) => {
+      html += `<button class="answer" data-val="${opt.definition.replace(/"/g,'&quot;')}" style="animation:bounceIn .5s var(--spring) ${i*.07}s both">
+                <span>${opt.definition}</span><span class="mark"></span>
+               </button>`;
+    });
+    el.answers.innerHTML = html;
+    el.answers.querySelectorAll(".answer").forEach(b=>{
+      b.onclick = () => chooseAnswer(b, b.dataset.val, q.vocab.definition, q);
+    });
+  }
+}
+
+function chooseAnswer(btn, got, correct, q){
+  if(answered) return;
+  answered = true;
+  const buttons = el.answers.querySelectorAll(".answer");
+
+  if(got === correct){
+    score++; streak++;
+    if(streak > bestStreak) bestStreak = streak;
+    btn.classList.add("correct");
+    buttons.forEach(b=>{ if(b !== btn) b.classList.add("dim"); });
+    el.result.textContent = "";
+    el.result.className = "result good";
+    const praise = ["✓ Correct!","✓ Nice ear!","✓ Well heard!","✓ Spot on!","✓ Brilliant!"][Math.floor(Math.random()*5)];
+    playStageSparkles(praise);
+    burst(btn);
+    // Replay the note if it was a listening question
+    if(q && q.type === "note"){
+      setTimeout(()=>playNote(q.answer, 1.2), 200);
+    }
+  } else {
+    streak = 0;
+    btn.classList.add("wrong");
+    buttons.forEach(b=>{
+      b.disabled = true;
+      if(b.dataset.val === correct) b.classList.add("correct");
+      else if(b !== btn) b.classList.add("dim");
+    });
+    if(q && q.type === "note"){
+      el.result.textContent = 'Not quite — it was ' + NOTE_LABEL[correct] + '.';
+    } else {
+      el.result.textContent = 'Not quite — the answer is "' + correct + '".';
+    }
+    el.result.className = "result bad";
+    if(q && q.type === "note"){
+      setTimeout(()=>playNote(got, 0.9), 250);
+      setTimeout(()=>playNote(correct, 0.9), 1000);
+    }
+  }
+  buttons.forEach(b=>b.disabled = true);
+  el.next.disabled = false;
+  updateStats();
+}
+
+function nextQuestion(){
+  if(current < TOTAL-1){ current++; renderQuiz(); updateStats(); }
+  else { finishQuiz(); }
+}
+function finishQuiz(){
+  el.progress.style.width = "100%";
+  const pct = Math.round(score/TOTAL*100);
+  let msg, icon;
+  if(pct === 100){ msg = "Perfect! Brilliant work!"; icon = "🏆"; confettiRain(); }
+  else if(pct >= 80){ msg = "Great job! Well done!"; icon = "🌟"; confettiRain(); }
+  else if(pct >= 50){ msg = "Good effort — keep practising!"; icon = "👍"; }
+  else { msg = "Nice start — try again to improve!"; icon = "🎧"; }
+
+  el.card.innerHTML = `
+    <div class="done">
+      <div class="big">${icon}</div>
+      <h3>Practice complete!</h3>
+      <div class="score-line">${score} / ${TOTAL}</div>
+      <p>${msg} Best streak: ${bestStreak}.</p>
+      <div class="actions">
+        <button class="btn btn-primary" id="againBtn">Play Again 🔁</button>
+        <button class="btn btn-ghost" id="doneCloseBtn">Close</button>
+      </div>
+    </div>`;
+  document.getElementById("againBtn").onclick = startQuiz;
+  document.getElementById("doneCloseBtn").onclick = closeQuiz;
+}
+function confettiRain(){
+  const colors = ["#7a2e3b","#a55462","#c9962e","#e8bc6a","#5b7d5f","#f5e6c8"];
+  for(let i=0;i<70;i++){
+    const c = document.createElement("div");
+    const size = 6 + Math.random()*10;
+    c.style.cssText = `position:fixed;top:-20px;width:${size}px;height:${size}px;background:${colors[i%colors.length]};left:${Math.random()*100}vw;pointer-events:none;z-index:9999;border-radius:${Math.random()<.5?"50%":"2px"};animation:confettiFall ${2+Math.random()*2.5}s linear forwards;animation-delay:${Math.random()*.6}s;`;
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(),5000);
+  }
+}
+
+el.speakBtn.onclick = ()=>{
+  const q = questions[current];
+  if(q && q.type === "note"){
+    playNote(q.answer, 1.4);
+    el.speakBtn.classList.add("playing");
+    setTimeout(()=>el.speakBtn.classList.remove("playing"), 900);
+  }
+};
+</script>
+</body>
+</html>
